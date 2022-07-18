@@ -143,7 +143,8 @@ void fifo_dump(struct fifo *fifo) {
 int main() {
     struct fifo *fifo;
     char *str;
-/*
+
+    /* === MY Tests ==== */
     fifo = fifo_new(3);
     TEST(fifo_push(fifo, "a"));
     TEST(fifo_push(fifo, "a"));
@@ -170,7 +171,8 @@ int main() {
     TEST(fifo->consume == fifo->produce && fifo->empty == 0 && fifo->produce == 1);
     fifo_dump(fifo);
     fifo_free(fifo);
-*/
+
+    /* === YOUR Tests ==== */
     fifo = fifo_new(4);
     TEST(fifo_push(fifo, "hello"));
     TEST(fifo_push(fifo, "world"));
