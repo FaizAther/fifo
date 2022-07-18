@@ -15,10 +15,11 @@ typedef struct fifo {
 // Create a new string FIFO object that can contain up to size elements.
 struct fifo *fifo_new(int size) {
     /* TODO: COMPLETE THIS PART */
+    struct fifo *container = NULL;
+
     if (size < 0) {
         return NULL;
     }
-    struct fifo *container = NULL;
     if (container = calloc(1, sizeof(struct fifo) + (sizeof(char *) * (unsigned long)size)), container == NULL) {
         fprintf(stderr, "ERR: calloc %d %s\n", errno, strerror(errno));
         return NULL;
