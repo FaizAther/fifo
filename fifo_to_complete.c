@@ -39,27 +39,25 @@ struct fifo *fifo_new(int size) {
  */
 void fifo_free(struct fifo *fifo) {
     if (fifo != NULL) {
-        if (fifo->contents != NULL) {
-            int start = fifo->consume, end = fifo->produce;
-            if (start == end && fifo->empty == 0) {
-                start = 0;
-                end = 0;
-            }
-            while (start != end || fifo->empty == 0) {
-                if (fifo->contents[start] != NULL) {
-                    bzero(fifo->contents[start], strlen(fifo->contents[start]));
-                    free(fifo->contents[start]);
-                }
-                start = (start + 1) % fifo->size;
-                if (start == end) {
-                    fifo->empty = 1;
-                }
-            }
-            bzero(fifo->contents, sizeof(char *) * fifo->size);
+        int start = fifo->consume, end = fifo->produce;
+        if (start == end && fifo->empty == 0) {
+            start = 0;
+            end = 0;
         }
-        bzero(fifo, sizeof(struct fifo));
-        free(fifo);
+        while (start != end || fifo->empty == 0) {
+            if (fifo->contents[start] != NULL) {
+                bzero(fifo->contents[start], strlen(fifo->contents[start]));
+                free(fifo->contents[start]);
+            }
+            start = (start + 1) % fifo->size;
+            if (start == end) {
+                fifo->empty = 1;
+            }
+        }
+        bzero(fifo->contents, sizeof(char *) * fifo->size);
     }
+    bzero(fifo, sizeof(struct fifo));
+    free(fifo);
 }
 
 /*
@@ -96,7 +94,7 @@ int fifo_push(struct fifo *fifo, const char *str) {
     char *str_cpy = NULL;
     int space = 0;
 
-    if (fifo == NULL || fifo->contents == NULL) { return 0; }
+    if (fifo == NULL) { return 0; }
     space = fifo->size - fifo_filled(fifo);
     if (str == NULL) { return space; }
     if (space <= 0) { return 0; }
@@ -124,7 +122,7 @@ char *fifo_pull(struct fifo *fifo) {
     char *str = NULL;
     int space = 0;
 
-    if (fifo == NULL || fifo->contents == NULL) return NULL;
+    if (fifo == NULL) return NULL;
 
     space = fifo_filled(fifo);
     if (space <= 0) { return NULL; }
