@@ -34,6 +34,11 @@ void fifo_free(struct fifo *fifo) {
     /* TODO: COMPLETE THIS PART */
     if (fifo != NULL) {
         if (fifo->contents != NULL) {
+            for (int i = 0; i < fifo->size; ++i) {
+                if (fifo->contents[i] != NULL) {
+                   free(fifo->contents[i]);
+                }
+            }
             bzero(fifo->contents, sizeof(char *) * fifo->size);
         }
         bzero(fifo, sizeof(struct fifo));
