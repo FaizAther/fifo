@@ -17,9 +17,8 @@ typedef struct fifo {
 struct fifo *fifo_new(int size) {
     struct fifo *container = NULL;
 
-    if (size < 0) {
-        return NULL;
-    }
+    if (size < 0) { return NULL; }
+
     container = (struct fifo *)calloc(1, sizeof(struct fifo) + (sizeof(char *) * (unsigned long)size));
     if (container == NULL) {
         fprintf(stderr, "ERR: calloc %d %s\n", errno, strerror(errno));
@@ -64,9 +63,7 @@ void fifo_free(struct fifo *fifo) {
 int fifo_filled(struct fifo *fifo) {
     int filled = 0;
 
-    if (fifo == NULL) {
-        return -1;
-    }
+    if (fifo == NULL) { return -1; }
 
     if (fifo->produce > fifo->consume) {
         filled = fifo->produce - fifo->consume;
@@ -94,13 +91,17 @@ int fifo_push(struct fifo *fifo, const char *str) {
     char *str_cpy = NULL;
     int space = 0;
 
-    if (fifo == NULL || fifo->contents == NULL) return 0;
+    if (fifo == NULL || fifo->contents == NULL) { return 0; }
     space = fifo->size - fifo_filled(fifo);
-    if (str == NULL) return space;
-    if (space <= 0 || ((space == fifo->size) && (fifo->empty == 0))) return 0;
+    if (str == NULL) { return space; }
+    if (space <= 0) { return 0; }
 
     str_sz = strlen(str) + 1;
     str_cpy = (char *)calloc((unsigned long)str_sz, sizeof(char));
+    if (str_cpy == NULL) {
+        fprintf(stderr, "ERR: calloc %d %s\n", errno, strerror(errno));
+        return space;
+    }
     memcpy(str_cpy, str, str_sz);
     fifo->contents[fifo->produce] = str_cpy;
     fifo->produce = (fifo->produce + 1) % fifo->size;
@@ -121,15 +122,11 @@ char *fifo_pull(struct fifo *fifo) {
     if (fifo == NULL || fifo->contents == NULL) return NULL;
 
     space = fifo_filled(fifo);
-    if (space <= 0) {
-        return NULL;
-    }
+    if (space <= 0) { return NULL; }
     str = fifo->contents[fifo->consume];
     fifo->contents[fifo->consume] = NULL;
     fifo->consume = (fifo->consume + 1) % fifo->size;
-    if (fifo->consume == fifo->produce) {
-        fifo->empty = 1;
-    }
+    if (fifo->consume == fifo->produce) { fifo->empty = 1; }
     return str;
 }
 
@@ -146,7 +143,34 @@ void fifo_dump(struct fifo *fifo) {
 int main() {
     struct fifo *fifo;
     char *str;
-
+/*
+    fifo = fifo_new(3);
+    TEST(fifo_push(fifo, "a"));
+    TEST(fifo_push(fifo, "a"));
+    str = fifo_pull(fifo);
+    TEST(!strcmp(str, "a"));
+    free(str);
+    str = fifo_pull(fifo);
+    TEST(!strcmp(str, "a"));
+    free(str);
+    TEST(fifo->consume == fifo->produce && fifo->empty == 1 && fifo->produce == 2);
+    TEST(fifo_push(fifo, "b"));
+    TEST(fifo_push(fifo, "b"));
+    str = fifo_pull(fifo);
+    TEST(!strcmp(str, "b"));
+    free(str);
+    str = fifo_pull(fifo);
+    TEST(!strcmp(str, "b"));
+    free(str);
+    TEST(fifo->consume == fifo->produce && fifo->empty == 1 && fifo->produce == 1);
+    TEST(fifo_push(fifo, "c"));
+    TEST(fifo_push(fifo, "c"));
+    TEST(fifo_push(fifo, "c"));
+    TEST(!fifo_push(fifo, "d"));
+    TEST(fifo->consume == fifo->produce && fifo->empty == 0 && fifo->produce == 1);
+    fifo_dump(fifo);
+    fifo_free(fifo);
+*/
     fifo = fifo_new(4);
     TEST(fifo_push(fifo, "hello"));
     TEST(fifo_push(fifo, "world"));
