@@ -43,7 +43,8 @@ void fifo_free(struct fifo *fifo) {
             }
             while (start != end || fifo->empty == 0) {
                 if (fifo->contents[start] != NULL) {
-                   free(fifo->contents[start]);
+                    bzero(fifo->contents[start], strlen(fifo->contents[start]));
+                    free(fifo->contents[start]);
                 }
                 start = (start + 1) % fifo->size;
                 if (start == end) {
