@@ -25,7 +25,7 @@ struct fifo *fifo_new(int size) {
         return NULL;
     }
     container->size = size;
-    container->empty = 1;
+    container->empty = (size > 0) ? 1 : 0;
     return container;
 }
 
@@ -145,6 +145,56 @@ int main() {
     char *str;
 
     /* === MY Tests ==== */
+    fifo = fifo_new(0);
+    TEST(!fifo_push(fifo, "a"));
+    str = fifo_pull(fifo);
+    TEST(str == NULL);
+    TEST(fifo->consume == fifo->produce && fifo->empty == 0 && fifo->produce == 0);
+    free(fifo);
+
+    fifo = fifo_new(1);
+    TEST(fifo_push(fifo, "a"));
+    TEST(!fifo_push(fifo, "a"));
+    TEST(fifo->consume == fifo->produce && fifo->empty == 0 && fifo->produce == 0);
+    str = fifo_pull(fifo);
+    TEST(fifo->consume == fifo->produce && fifo->empty == 1 && fifo->produce == 0);
+    TEST(!strcmp(str, "a"));
+    free(str);
+    fifo_dump(fifo);
+    fifo_free(fifo);
+
+    fifo = fifo_new(2);
+    TEST(fifo_push(fifo, "a"));
+    TEST(fifo_push(fifo, "a"));
+    TEST(!fifo_push(fifo, "a"));
+    TEST(fifo->consume == fifo->produce && fifo->empty == 0 && fifo->produce == 0);
+    str = fifo_pull(fifo);
+    TEST(!strcmp(str, "a"));
+    free(str);
+    str = fifo_pull(fifo);
+    TEST(!strcmp(str, "a"));
+    free(str);
+    TEST(fifo->consume == fifo->produce && fifo->empty == 1 && fifo->produce == 0);
+    TEST(fifo_push(fifo, "b"));
+    TEST(fifo->consume == 0 && fifo->empty == 0 && fifo->produce == 1);
+    str = fifo_pull(fifo);
+    TEST(fifo->consume == 1 && fifo->empty == 1 && fifo->produce == 1);
+    TEST(!strcmp(str, "b"));
+    free(str);
+    TEST(fifo_push(fifo, "c"));
+    TEST(fifo_push(fifo, "c"));
+    TEST(!fifo_push(fifo, "c"));
+    TEST(fifo->consume == fifo->produce && fifo->empty == 0 && fifo->produce == 1);
+    str = fifo_pull(fifo);
+    TEST(!strcmp(str, "c"));
+    free(str);
+    str = fifo_pull(fifo);
+    TEST(fifo->consume == fifo->produce && fifo->empty == 1 && fifo->produce == 1);
+    TEST(!strcmp(str, "c"));
+    free(str);
+    fifo_dump(fifo);
+    fifo_free(fifo);
+
     fifo = fifo_new(3);
     TEST(fifo_push(fifo, "a"));
     TEST(fifo_push(fifo, "a"));
