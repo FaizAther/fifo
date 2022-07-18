@@ -20,7 +20,8 @@ struct fifo *fifo_new(int size) {
     if (size < 0) {
         return NULL;
     }
-    if (container = calloc(1, sizeof(struct fifo) + (sizeof(char *) * (unsigned long)size)), container == NULL) {
+    container = calloc(1, sizeof(struct fifo) + (sizeof(char *) * (unsigned long)size));
+    if (container == NULL) {
         fprintf(stderr, "ERR: calloc %d %s\n", errno, strerror(errno));
         return NULL;
     }
