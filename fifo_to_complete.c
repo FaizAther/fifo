@@ -11,16 +11,16 @@ typedef struct fifo {
     char *contents[];
 } fifo;
 
-
-// Create a new string FIFO object that can contain up to size elements.
+/*
+ * Create a new string FIFO object that can contain up to size elements.
+ */
 struct fifo *fifo_new(int size) {
-    /* TODO: COMPLETE THIS PART */
     struct fifo *container = NULL;
 
     if (size < 0) {
         return NULL;
     }
-    container = calloc(1, sizeof(struct fifo) + (sizeof(char *) * (unsigned long)size));
+    container = (struct fifo *)calloc(1, sizeof(struct fifo) + (sizeof(char *) * (unsigned long)size));
     if (container == NULL) {
         fprintf(stderr, "ERR: calloc %d %s\n", errno, strerror(errno));
         return NULL;
@@ -30,14 +30,24 @@ struct fifo *fifo_new(int size) {
     return container;
 }
 
-// Free a FIFO object and all its contents.
+/*
+ * Free a FIFO object and all its contents.
+ */
 void fifo_free(struct fifo *fifo) {
-    /* TODO: COMPLETE THIS PART */
     if (fifo != NULL) {
         if (fifo->contents != NULL) {
-            for (int i = 0; i < fifo->size; ++i) {
-                if (fifo->contents[i] != NULL) {
-                   free(fifo->contents[i]);
+            int start = fifo->consume, end = fifo->produce;
+            if (start == end && fifo->empty == 0) {
+                start = 0;
+                end = 0;
+            }
+            while (start != end || fifo->empty == 0) {
+                if (fifo->contents[start] != NULL) {
+                   free(fifo->contents[start]);
+                }
+                start = (start + 1) % fifo->size;
+                if (start == end) {
+                    fifo->empty = 1;
                 }
             }
             bzero(fifo->contents, sizeof(char *) * fifo->size);
@@ -47,23 +57,49 @@ void fifo_free(struct fifo *fifo) {
     }
 }
 
-// Push a string into the FIFO.
-// Returns whether there was space in the FIFO to store the string.
-// If successful, the FIFO stores a copy of the string dynamically allocated on the heap.
-// If unsuccessful, the FIFO remains unchanged and no memory is allocated.
+/*
+ * Returns N elements filled inside fifo
+ */
+int fifo_filled(struct fifo *fifo) {
+    int filled = 0;
+
+    if (fifo == NULL) {
+        return -1;
+    }
+
+    if (fifo->produce > fifo->consume) {
+        filled = fifo->produce - fifo->consume;
+    } else if (fifo->produce < fifo->consume) {
+        filled = fifo->size - fifo->consume;
+        filled += fifo->produce;
+    } else {
+        if (fifo->empty == 1) {
+            filled = 0;
+        } else {
+            filled = fifo->size;
+        }
+    }
+    return filled;
+}
+
+/*
+ * Push a string into the FIFO.
+ * Returns whether there was space in the FIFO to store the string.
+ * If successful, the FIFO stores a copy of the string dynamically allocated on the heap.
+ * If unsuccessful, the FIFO remains unchanged and no memory is allocated.
+ */
 int fifo_push(struct fifo *fifo, const char *str) {
-    /* TODO: COMPLETE THIS PART */
-    int str_sz = 0;
+    ssize_t str_sz = 0;
     char *str_cpy = NULL;
     int space = 0;
 
     if (fifo == NULL || fifo->contents == NULL) return 0;
-    space = (fifo->size - fifo->produce) + fifo->consume;
+    space = fifo->size - fifo_filled(fifo);
     if (str == NULL) return space;
     if (space <= 0 || ((space == fifo->size) && (fifo->empty == 0))) return 0;
 
-    str_sz = strlen(str);
-    str_cpy = calloc(str_sz, sizeof(char));
+    str_sz = strlen(str) + 1;
+    str_cpy = (char *)calloc((unsigned long)str_sz, sizeof(char));
     memcpy(str_cpy, str, str_sz);
     fifo->contents[fifo->produce] = str_cpy;
     fifo->produce = (fifo->produce + 1) % fifo->size;
@@ -71,26 +107,19 @@ int fifo_push(struct fifo *fifo, const char *str) {
     return space;
 }
 
-// Pull a string from the FIFO.
-// Returns NULL if the FIFO is empty.
-// If the returned value is not NULL, the caller takes ownership of the string and 
-// is responsible for freeing it.
+/*
+ * Pull a string from the FIFO.
+ * Returns NULL if the FIFO is empty.
+ * If the returned value is not NULL, the caller takes ownership of the string and 
+ * is responsible for freeing it.
+ */
 char *fifo_pull(struct fifo *fifo) {
-    /* TODO: COMPLETE THIS PART */
     char *str = NULL;
     int space = 0;
 
     if (fifo == NULL || fifo->contents == NULL) return NULL;
 
-    if (fifo->produce < fifo->consume) {
-        space = fifo->consume - fifo->produce;
-    } else if (fifo->consume < fifo->produce) {
-        space = fifo->produce - fifo->consume;
-    } else if (fifo->empty == 0) {
-        space = fifo->size;
-    } else if (fifo->empty != 0) {
-        return NULL;
-    }
+    space = fifo_filled(fifo);
     if (space <= 0) {
         return NULL;
     }
