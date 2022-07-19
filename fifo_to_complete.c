@@ -95,7 +95,7 @@ int fifo_push(struct fifo *fifo, const char *str) {
 /*
  * Pull a string from the FIFO.
  * Returns NULL if the FIFO is empty.
- * If the returned value is not NULL, the caller takes ownership of the string and 
+ * If the returned value is not NULL, the caller takes ownership of the string and
  * is responsible for freeing it.
  */
 char *fifo_pull(struct fifo *fifo) {
