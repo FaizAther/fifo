@@ -9,13 +9,13 @@
 #include <string.h>
 #include <errno.h>
 
-typedef struct fifo {
+struct fifo {
     int size;
     int empty;
     int produce;
     int consume;
     char *contents[];
-} fifo;
+};
 
 /*
  * Create a new string FIFO object that can contain up to size elements.
@@ -44,10 +44,6 @@ void fifo_free(struct fifo *fifo) {
     if (fifo == NULL) { return; }
 
     int curr = fifo->consume, end = fifo->produce;
-    if (curr == end && fifo->empty == 0) {
-        curr = 0;
-        end = 0;
-    }
     while (curr != end || fifo->empty == 0) {
         if (fifo->contents[curr] != NULL) {
             bzero(fifo->contents[curr], strlen(fifo->contents[curr]));
@@ -99,7 +95,7 @@ int fifo_push(struct fifo *fifo, const char *str) {
  * is responsible for freeing it.
  */
 char *fifo_pull(struct fifo *fifo) {
-    if (fifo == NULL) return NULL;
+    if (fifo == NULL) { return NULL; }
 
     char *str = NULL;
     int space = 0;
