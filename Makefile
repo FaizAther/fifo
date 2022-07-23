@@ -1,6 +1,6 @@
 .PHONY: all clean debug
 
-all: fifo_to_complete
+all: fifo_to_complete debug
 
 debug: fifo_to_complete_debug
 
