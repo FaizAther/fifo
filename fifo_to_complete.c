@@ -128,6 +128,7 @@ int main() {
 
     /* === MY Tests ==== */
     fifo = fifo_new(0);
+    TEST(fifo_pull(fifo) == NULL);
     TEST(!fifo_push(fifo, "a"));
     str = fifo_pull(fifo);
     TEST(str == NULL);
@@ -135,6 +136,7 @@ int main() {
     free(fifo);
 
     fifo = fifo_new(1);
+    TEST(fifo_pull(fifo) == NULL);
     TEST(fifo_push(fifo, "a"));
     TEST(!fifo_push(fifo, "a"));
     TEST(fifo->consume == fifo->produce && fifo->empty == 0 && fifo->produce == 0);
@@ -146,6 +148,7 @@ int main() {
     fifo_free(fifo);
 
     fifo = fifo_new(2);
+    TEST(fifo_pull(fifo) == NULL);
     TEST(fifo_push(fifo, "a"));
     TEST(fifo_push(fifo, "a"));
     TEST(!fifo_push(fifo, "a"));
@@ -157,6 +160,7 @@ int main() {
     TEST(!strcmp(str, "a"));
     free(str);
     TEST(fifo->consume == fifo->produce && fifo->empty == 1 && fifo->produce == 0);
+    TEST(fifo_pull(fifo) == NULL);
     TEST(fifo_push(fifo, "b"));
     TEST(fifo->consume == 0 && fifo->empty == 0 && fifo->produce == 1);
     str = fifo_pull(fifo);
@@ -178,6 +182,7 @@ int main() {
     fifo_free(fifo);
 
     fifo = fifo_new(3);
+    TEST(fifo_pull(fifo) == NULL);
     TEST(fifo_push(fifo, "a"));
     TEST(fifo_push(fifo, "a"));
     str = fifo_pull(fifo);
